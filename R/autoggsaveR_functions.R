@@ -38,13 +38,12 @@ get_plot_info <- function(plot_lst, verbose = FALSE) {
 
 #' Get the number of items on the x and y axes of a ggplot object
 #'
-#' This function extracts the data from a ggplot object and counts the unique
-#' values of the x and y variables if it's discrete, or calculates the range if it's continuous.
-#' It also calculates the range of the y variable.
+#' This function extracts the data from a ggplot object and counts the unique number of
+#' values of the x and y variables
 #'
 #' @param plot A ggplot object
 #'
-#' @return A list with the length or range of the x and y axes, depending on whether they are continuous or discrete
+#' @return A list with the length or range of the x and y axes
 get_num_plot_items <- function(plot) {
     # Extract the data from the plot
     plot_data <- ggplot2::ggplot_build(plot)$data[[1]]

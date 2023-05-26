@@ -67,6 +67,8 @@ ggplot2::ggsave(
 #  Saving 13.9 x 10.2 in image
 ```
 
+![alt text](example_images/test-no_auto.png)
+
 Without autoggsaveR:
 
 ```r
@@ -86,3 +88,5 @@ auto_save_plot(
 # Applying slightly increased base size to individual plots:  10.0129919450457
 # Plotting with height = 8.22921505351538 and width = 14.6875533368602 
 ```
+
+![alt text](example_images/test_withauto.png)

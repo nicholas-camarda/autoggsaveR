@@ -86,15 +86,16 @@ auto_save_plot <- function(plot_lst, relative_output_dir, file_name, ncol = 1, b
     max_num_x <- max(axes_info$num_x_items, na.rm = TRUE)
     max_num_y <- max(axes_info$num_y_items, na.rm = TRUE)
 
-    # Adjust the base size based on the inverse of the number of plots
-    log_attrb <- log(plot_info$num_plots + plot_info$num_layers + plot_info$num_facets + ncol)
-    adjusted_base_size <- sqrt(base_size - plot_info$num_plots + 1) * log_attrb
+    # Adjust the base size
+    sqrt_attrb <- log(plot_info$num_plots + plot_info$num_layers + plot_info$num_facets + ncol)
+    # log_attrb <- log(plot_info$num_plots + plot_info$num_layers + plot_info$num_facets + ncol)
+    adjusted_base_size <- sqrt(base_size - plot_info$num_plots + 1) * sqrt_attrb
 
     # Adjust the text size of each plot in the list
     indv_adjusted_base_size <- adjusted_base_size + 2
+    indv_adjusted_base_size
     plot_lst <- lapply(plot_lst, function(p) {
         p + ggplot2::theme(
-            text = ggplot2::element_text(size = indv_adjusted_base_size),
             plot.margin = ggplot2::margin(0.1, 0.1, 0.1, 0.1, "cm")
         )
     })

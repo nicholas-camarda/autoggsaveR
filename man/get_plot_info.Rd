@@ -4,7 +4,7 @@
 \alias{get_plot_info}
 \title{Get information about a list of plots}
 \usage{
-get_plot_info(plot_lst)
+get_plot_info(plot_lst, verbose = FALSE)
 }
 \arguments{
 \item{plot_lst}{A list of ggplot objects}

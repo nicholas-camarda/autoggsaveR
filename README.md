@@ -73,7 +73,7 @@ p1 <- gplot(mtcars, aes(hp, wt, color = as.factor(cyl))) +
                   caption = "caption")
 ```
 
-With autoggsaveR:
+Without `autoggsaveR`:
 
 ```r
 ggsave(
@@ -85,7 +85,7 @@ ggsave(
 
 ![alt text](example_images/test-no_auto.png)
 
-Without autoggsaveR:
+With `autoggsaveR`, the dimensions are more appealing:
 
 ```r
 auto_save_plot(

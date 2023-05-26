@@ -30,6 +30,16 @@ You can get information about the plots using the `get_plot_info` function:
 ```r
 plot_info <- get_plot_info(plot_lst)
 print(plot_info)
+
+# $num_plots
+# [1] 2
+
+# $num_layers
+# [1] 2
+
+# $num_facets
+# [1] 0
+
 ```
 
 You can also get the number of items on the x and y axes of a plot using the `get_num_plot_items` function:
@@ -37,6 +47,12 @@ You can also get the number of items on the x and y axes of a plot using the `ge
 ```r
 axes_info <- get_num_plot_items(p1)
 print(axes_info)
+
+# $num_x_items
+# [1] 25
+
+# $num_y_items
+# [1] 27
 ```
 
 Finally, you can save the plots as a single image using the auto_save_plot function. This will save the plots as a single image in a directory you specify relative to your working directory. The output directory will be created recursively if it doesn't exist:
@@ -48,11 +64,11 @@ auto_save_plot(plot_lst, "my_plot.png")
 ## Example plot
 
 ```r
-p1 <- ggplot2::ggplot(mtcars, ggplot2::aes(hp, wt, color = as.factor(cyl))) +
-    ggplot2::geom_point() +
-    ggplot2::facet_wrap(~`cyl`) +
-    ggplot2::theme_bw(base_size = 20) +
-    ggplot2::labs(title = "My Title", 
+p1 <- gplot(mtcars, aes(hp, wt, color = as.factor(cyl))) +
+    geom_point() +
+    facet_wrap(~`cyl`) +
+    theme_bw(base_size = 20) +
+    labs(title = "My Title", 
                   subtitle = "subtitle", 
                   caption = "caption")
 ```
@@ -60,7 +76,7 @@ p1 <- ggplot2::ggplot(mtcars, ggplot2::aes(hp, wt, color = as.factor(cyl))) +
 With autoggsaveR:
 
 ```r
-ggplot2::ggsave(
+ggsave(
     plot = p1,
     filename = "example_images/test-no_auto.png"
 )

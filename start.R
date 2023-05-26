@@ -27,3 +27,6 @@ usethis::use_test("auto_save_plot")
 
 # test
 devtools::test()
+
+# install the package
+devtools::install()

@@ -70,13 +70,14 @@ get_num_plot_items <- function(plot) {
 #' Supports multiple plots in a single ggplot2 object as created by `library(patchwork)`
 #'
 #' @param plot_lst A list of ggplot objects
-#' @param file_path The path where the image should be saved
+#' @param relative_output_dir relative output directory for the image to be saved
+#' @param file_path The file name of the image to be saved
 #' @param ncol The number of columns in the final plot (default is 1)
 #' @param base_size The base size for the final plot (default is 20)
 #' @param verbose Controls verbosity of output details
 #'
 #' @return This function does not return a value. It saves the final plot as an image.
-auto_save_plot <- function(plot_lst, file_path, ncol = 1, base_size = 20, verbose = TRUE) {
+auto_save_plot <- function(plot_lst, relative_output_dir, file_name, ncol = 1, base_size = 20, verbose = TRUE) {
     # Get the plot info
     plot_info <- get_plot_info(plot_lst, verbose = verbose)
     axes_info <- t(sapply(plot_lst, function(p) get_num_plot_items(p))) %>%
@@ -112,6 +113,10 @@ auto_save_plot <- function(plot_lst, file_path, ncol = 1, base_size = 20, verbos
         message(paste("Plotting with height =", height, "and width =", width, "\n"))
     }
 
+    dir.create(relative_output_dir, showWarnings = FALSE, recursive = TRUE)
     # Save the plot with the calculated dimensions
-    ggplot2::ggsave(file_path, plot = final_plot, height = height, width = width)
+    ggplot2::ggsave(
+        filename = file.path(relative_output_dir, file_name),
+        plot = final_plot, height = height, width = width
+    )
 }

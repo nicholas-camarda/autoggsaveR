@@ -10,10 +10,9 @@ get_num_plot_items(plot)
 \item{plot}{A ggplot object}
 }
 \value{
-A list with the length or range of the x and y axes, depending on whether they are continuous or discrete
+A list with the length or range of the x and y axes
 }
 \description{
-This function extracts the data from a ggplot object and counts the unique
-values of the x and y variables if it's discrete, or calculates the range if it's continuous.
-It also calculates the range of the y variable.
+This function extracts the data from a ggplot object and counts the unique number of
+values of the x and y variables
 }

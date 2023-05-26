@@ -10,11 +10,12 @@ test_that("auto_save_plot saves a plot to a file", {
 
   # Call the function with a temporary file path
   temp_file <- tempfile(fileext = ".png")
-  auto_save_plot(plot_lst, temp_file, verbose = FALSE)
+  temp_dir <- "test"
+  auto_save_plot(plot_lst, temp_dir, temp_file, verbose = FALSE)
 
   # Check that the file was created
-  expect_true(file.exists(temp_file))
+  expect_true(file.exists(file.path(temp_dir, temp_file)))
 
   # Clean up the temporary file
-  unlink(temp_file)
+  unlink(temp_dir, recursive = TRUE, force = TRUE)
 })

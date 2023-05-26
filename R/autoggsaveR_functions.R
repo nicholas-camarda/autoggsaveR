@@ -8,8 +8,9 @@ NULL
 #' This function extracts the number of plots, the number of layers across all plots, and the number of facets
 #'
 #' @param plot_lst A list of ggplot objects
-#'
+#' @param verbose Controls verbosity of output details
 #' @return A list with the number of plots, layers, and facets
+#' @export
 get_plot_info <- function(plot_lst, verbose = FALSE) {
     num_plots <- length(plot_lst)
     num_layers <- sum(sapply(plot_lst, function(p) length(p$layers)))
@@ -44,6 +45,7 @@ get_plot_info <- function(plot_lst, verbose = FALSE) {
 #' @param plot A ggplot object
 #'
 #' @return A list with the length or range of the x and y axes
+#' @export
 get_num_plot_items <- function(plot) {
     # Extract the data from the plot
     plot_data <- ggplot2::ggplot_build(plot)$data[[1]]
@@ -71,12 +73,13 @@ get_num_plot_items <- function(plot) {
 #'
 #' @param plot_lst A list of ggplot objects
 #' @param relative_output_dir relative output directory for the image to be saved
-#' @param file_path The file name of the image to be saved
+#' @param file_name The file name of the image to be saved
 #' @param ncol The number of columns in the final plot (default is 1)
 #' @param base_size The base size for the final plot (default is 20)
 #' @param verbose Controls verbosity of output details
 #'
 #' @return This function does not return a value. It saves the final plot as an image.
+#' @export
 auto_save_plot <- function(plot_lst, relative_output_dir, file_name, ncol = 1, base_size = 20, verbose = TRUE) {
     # Get the plot info
     plot_info <- get_plot_info(plot_lst, verbose = verbose)
@@ -110,7 +113,7 @@ auto_save_plot <- function(plot_lst, relative_output_dir, file_name, ncol = 1, b
 
     if (verbose) {
         message(GetoptLong::qq("Adjusted base size = @{adjusted_base_size}"))
-        message(GetoptLong::qq("Applying slightly increased base size to individual plots:  @{indv_adjusted_base_size}"))
+        message(GetoptLong::qq("Applying slightly increased base size to height/width calculation:  @{indv_adjusted_base_size}"))
         message(paste("Plotting with height =", height, "and width =", width, "\n"))
     }
 

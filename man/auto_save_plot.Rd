@@ -18,13 +18,13 @@ auto_save_plot(
 
 \item{relative_output_dir}{relative output directory for the image to be saved}
 
+\item{file_name}{The file name of the image to be saved}
+
 \item{ncol}{The number of columns in the final plot (default is 1)}
 
 \item{base_size}{The base size for the final plot (default is 20)}
 
 \item{verbose}{Controls verbosity of output details}
-
-\item{file_path}{The file name of the image to be saved}
 }
 \value{
 This function does not return a value. It saves the final plot as an image.

@@ -8,6 +8,8 @@ get_plot_info(plot_lst, verbose = FALSE)
 }
 \arguments{
 \item{plot_lst}{A list of ggplot objects}
+
+\item{verbose}{Controls verbosity of output details}
 }
 \value{
 A list with the number of plots, layers, and facets

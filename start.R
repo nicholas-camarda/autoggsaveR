@@ -30,9 +30,3 @@ devtools::test()
 
 # install the package
 devtools::install()
-
-ggplot2::ggplot(mtcars, ggplot2::aes(hp, wt, color = as.factor(cyl))) +
-    ggplot2::geom_point() +
-    ggplot2::facet_wrap(~`cyl`) +
-    ggplot2::theme_bw(base_size = 20) +
-    ggplot2::labs(subtitle = "subtitle", caption = "caption")

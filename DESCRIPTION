@@ -18,3 +18,5 @@ Imports:
     patchwork,
     tidyr,
     magrittr
+URL: https://github.com/nicholas-camarda/autoggsaveR
+BugReports: https://github.com/nicholas-camarda/autoggsaveR/issues

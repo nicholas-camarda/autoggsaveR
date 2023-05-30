@@ -122,7 +122,7 @@ auto_save_plot <- function(plot_lst, relative_output_dir, file_name, ncol = 1, b
             text = ggplot2::element_text(size = base_size * indv_complexity_ratio),
             axis.title = ggplot2::element_text(size = base_size * indv_complexity_ratio),
             axis.ticks = ggplot2::element_line(linewidth = base_size * indv_complexity_ratio * 0.05),
-            axis.ticks.length = unit(base_size * indv_complexity_ratio * 0.2, "pt"),
+            axis.ticks.length = ggplot2::unit(base_size * indv_complexity_ratio * 0.2, "pt"),
             axis.text = ggplot2::element_text(size = base_size * indv_complexity_ratio * 0.8),
             plot.title = ggplot2::element_text(size = base_size * indv_complexity_ratio * 1.2),
             plot.subtitle = ggplot2::element_text(size = base_size * indv_complexity_ratio),
@@ -132,10 +132,10 @@ auto_save_plot <- function(plot_lst, relative_output_dir, file_name, ncol = 1, b
         # Check if the plot has geom_point or geom_line and adjust accordingly
         for (layer in p$layers) {
             if (class(layer$geom)[1] == "GeomPoint") {
-                p2 <- p1 + geom_point(size = base_size * indv_complexity_ratio * 0.125)
+                p2 <- p1 + ggplot2::geom_point(size = base_size * indv_complexity_ratio * 0.125)
             }
             if (class(layer$geom)[1] == "GeomLine") {
-                p2 <- p1 + geom_line(linewidth = base_size * indv_complexity_ratio * 0.05)
+                p2 <- p1 + ggplot2::geom_line(linewidth = base_size * indv_complexity_ratio * 0.05)
             }
         }
 

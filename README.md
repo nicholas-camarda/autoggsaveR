@@ -64,23 +64,25 @@ auto_save_plot(plot_lst, "my_plot.png")
 ## Example plot
 
 ```r
-p1 <- gplot(mtcars, aes(hp, wt, color = as.factor(cyl))) +
-    geom_point() +
-    facet_wrap(~`cyl`) +
-    theme_bw(base_size = 20) +
-    labs(title = "My Title", 
-                  subtitle = "subtitle", 
-                  caption = "caption")
+  p1 <- ggplot2::ggplot(mtcars, ggplot2::aes(mpg, disp)) +
+    ggplot2::geom_point() +
+    ggplot2::facet_wrap(~`cyl`)
+  p2 <- ggplot2::ggplot(mtcars, ggplot2::aes(hp, wt)) +
+    ggplot2::geom_point() +
+    ggplot2::facet_wrap(~`gear`)
+  p3 <- ggplot2::ggplot(mtcars, ggplot2::aes(drat, qsec)) +
+    ggplot2::geom_point() +
+    ggplot2::facet_wrap(~`carb`)
+  plot_lst <- list(p1, p2, p3)
 ```
 
 Without `autoggsaveR`:
 
 ```r
-ggsave(
-    plot = p1,
-    filename = "example_images/test-no_auto.png"
-)
-#  Saving 13.9 x 10.2 in image
+library(patchwork)
+ggsave(plot = p1 + p2 + p3, filename = file.path("example_images", "test-no_auto.png"))
+
+# Saving 8.33 x 7.25 in image
 ```
 
 ![alt text](example_images/test-no_auto.png)
@@ -88,8 +90,9 @@ ggsave(
 With `autoggsaveR`, the dimensions are more appealing:
 
 ```r
+library(autoggsaveR)
 auto_save_plot(
-    plot = list(p1), 
+    plot = plot_lst, 
     relative_output_dir = "example_images", 
     file_name = "test_withauto.png", 
     base_size = 20, 
@@ -97,12 +100,24 @@ auto_save_plot(
     verbose = TRUE
 )
 # Found:
+#             num_plots = 3
+#             num_layers = 3
+#             num_facets = 12
+# For individual plots:
+# Found:
 #             num_plots = 1
 #             num_layers = 1
 #             num_facets = 3
-# Adjusted base size = 8.01299194504575
-# Applying slightly increased base size to individual plots:  10.0129919450457
-# Plotting with height = 8.22921505351538 and width = 14.6875533368602 
+# Found:
+#             num_plots = 1
+#             num_layers = 1
+#             num_facets = 3
+# Found:
+#             num_plots = 1
+#             num_layers = 1
+#             num_facets = 6
+# Adjusted base size = 12.4921966137515
+# Plotting with height = 12.0354382112558 and width = 12.2177597680498 
 ```
 
 ![alt text](example_images/test_withauto.png)

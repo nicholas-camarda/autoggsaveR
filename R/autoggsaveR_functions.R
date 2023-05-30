@@ -51,14 +51,27 @@ get_num_plot_items <- function(plot) {
     plot_data <- ggplot2::ggplot_build(plot)$data[[1]]
     num_x_items <- length(unique(plot_data$x))
 
-    # Count the unique values of the x variable if it's discrete, or calculate the range if it's continuous
-    # num_y_items <- if (y_discrete) {
+    # Count the unique values of the x variable
     num_y_items <- length(unique(plot_data$y))
-    # } else {
-    # y_range <- ggplot2::layer_scales(plot)$y$get_limits()
-    # num_y_items <- y_range[2] - y_range[1]
-    # }
     return(list(num_x_items = num_x_items, num_y_items = num_y_items))
+}
+
+#' Calculate plot complexity
+#'
+#' This function calculates complexity of the final plot
+#' based off of the number of plots, layers, and facets, and the
+#' desired number of columns of plots, in the final plot
+#'
+#' @param base_size The base size for the final plot (default is 20)
+#' @param plot_info The list of plot information as calculated by `get_plot_info`
+#' @param ncol The number of columns in the output
+#'
+#' @return This function returns a number representing the complexity of the plot
+#' @export
+get_plot_complexity <- function(base_size = 20, plot_info, ncol) {
+    sqrt_attrb <- log(plot_info$num_plots + plot_info$num_layers + plot_info$num_facets + ncol)
+    p_cmplx <- sqrt(base_size - plot_info$num_plots + 1) * sqrt_attrb
+    return(p_cmplx)
 }
 
 
@@ -90,30 +103,56 @@ auto_save_plot <- function(plot_lst, relative_output_dir, file_name, ncol = 1, b
     max_num_y <- max(axes_info$num_y_items, na.rm = TRUE)
 
     # Adjust the base size
-    sqrt_attrb <- log(plot_info$num_plots + plot_info$num_layers + plot_info$num_facets + ncol)
-    # log_attrb <- log(plot_info$num_plots + plot_info$num_layers + plot_info$num_facets + ncol)
-    adjusted_base_size <- sqrt(base_size - plot_info$num_plots + 1) * sqrt_attrb
+    adjusted_base_size <- get_plot_complexity(base_size = base_size, plot_info = plot_info, ncol = ncol)
+    complexity_ratio <- base_size / adjusted_base_size
 
     # Adjust the text size of each plot in the list
-    indv_adjusted_base_size <- adjusted_base_size + 2
-    indv_adjusted_base_size
-    plot_lst <- lapply(plot_lst, function(p) {
-        p + ggplot2::theme(
-            plot.margin = ggplot2::margin(0.1, 0.1, 0.1, 0.1, "cm")
+    if (verbose) {
+        message("For individual plots:")
+    }
+    plot_lst_updated <- lapply(plot_lst, function(p) {
+        # Get the complexity of the individual plot
+        indv_plot_info <- get_plot_info(list(p), verbose = verbose)
+        indv_adjusted_base_size <- get_plot_complexity(base_size = base_size, plot_info = indv_plot_info, ncol = ncol)
+        indv_complexity_ratio <- indv_adjusted_base_size / adjusted_base_size
+
+        # Adjust the text
+        p1 <- p + ggplot2::theme(
+            plot.margin = ggplot2::margin(0.25, 0.25, 0.25, 0.25, "cm"),
+            text = ggplot2::element_text(size = base_size * indv_complexity_ratio),
+            axis.title = ggplot2::element_text(size = base_size * indv_complexity_ratio),
+            axis.ticks = ggplot2::element_line(linewidth = base_size * indv_complexity_ratio * 0.05),
+            axis.ticks.length = unit(base_size * indv_complexity_ratio * 0.2, "pt"),
+            axis.text = ggplot2::element_text(size = base_size * indv_complexity_ratio * 0.8),
+            plot.title = ggplot2::element_text(size = base_size * indv_complexity_ratio * 1.2),
+            plot.subtitle = ggplot2::element_text(size = base_size * indv_complexity_ratio),
+            strip.text = ggplot2::element_text(size = base_size * indv_complexity_ratio)
         )
+
+        # Check if the plot has geom_point or geom_line and adjust accordingly
+        for (layer in p$layers) {
+            if (class(layer$geom)[1] == "GeomPoint") {
+                p2 <- p1 + geom_point(size = base_size * indv_complexity_ratio * 0.125)
+            }
+            if (class(layer$geom)[1] == "GeomLine") {
+                p2 <- p1 + geom_line(linewidth = base_size * indv_complexity_ratio * 0.05)
+            }
+        }
+
+        return(p2)
     })
 
     # Combine the plots into a patchwork object
-    final_plot <- patchwork::wrap_plots(plotlist = plot_lst, ncol = ncol)
+    final_plot <- patchwork::wrap_plots(plotlist = plot_lst_updated, ncol = ncol)
 
     # Calculate dimensions based on the number of axes lengths, panels, plots, and facets in the plot
     # Normalize the y-range by the maximum y-range
-    height <- adjusted_base_size - log(max_num_y) + log(plot_info$num_layers + plot_info$num_plots + plot_info$num_facets + ncol) * 2
-    width <- adjusted_base_size + log(max_num_x) + log(plot_info$num_layers + plot_info$num_plots + plot_info$num_facets + ncol) * 2
+    height <- adjusted_base_size - log(max_num_y) + log(plot_info$num_layers + plot_info$num_plots + plot_info$num_facets + ncol)
+    width <- adjusted_base_size - log(max_num_x) + log(plot_info$num_layers + plot_info$num_plots + plot_info$num_facets + ncol)
 
     if (verbose) {
         message(GetoptLong::qq("Adjusted base size = @{adjusted_base_size}"))
-        message(GetoptLong::qq("Applying slightly increased base size to height/width calculation:  @{indv_adjusted_base_size}"))
+        # message(GetoptLong::qq("Applying adjusted base size to height/width calculation:  @{indv_adjusted_base_size}"))
         message(paste("Plotting with height =", height, "and width =", width, "\n"))
     }
 

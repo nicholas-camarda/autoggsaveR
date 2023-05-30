@@ -58,7 +58,14 @@ print(axes_info)
 Finally, you can save the plots as a single image using the auto_save_plot function. This will save the plots as a single image in a directory you specify relative to your working directory. The output directory will be created recursively if it doesn't exist:
 
 ```r
-auto_save_plot(plot_lst, "my_plot.png")
+auto_save_plot(
+    plot = plot_lst, 
+    relative_output_dir = "output_dir", 
+    file_name = "my_plots.png", 
+    base_size = 20, 
+    ncol = 1,
+    verbose = TRUE
+)
 ```
 
 ## Example plot

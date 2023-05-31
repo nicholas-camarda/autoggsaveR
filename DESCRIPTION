@@ -13,10 +13,10 @@ Suggests:
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 Imports: 
-    GetoptLong,
     ggplot2,
     patchwork,
-    tidyr,
-    magrittr
+    magrittr,
+    purrr,
+    stringr
 URL: https://github.com/nicholas-camarda/autoggsaveR
 BugReports: https://github.com/nicholas-camarda/autoggsaveR/issues

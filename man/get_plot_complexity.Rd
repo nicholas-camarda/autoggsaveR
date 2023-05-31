@@ -4,20 +4,18 @@
 \alias{get_plot_complexity}
 \title{Calculate plot complexity}
 \usage{
-get_plot_complexity(base_size = 20, plot_info, ncol)
+get_plot_complexity(plot_info, axes_info)
 }
 \arguments{
-\item{base_size}{The base size for the final plot (default is 20)}
+\item{plot_info}{The list of plot information as calculated by \code{get_plot_info()}}
 
-\item{plot_info}{The list of plot information as calculated by \code{get_plot_info}}
-
-\item{ncol}{The number of columns in the output}
+\item{axes_info}{Axes info generated from \code{get_axes_info()}}
 }
 \value{
-This function returns a number representing the complexity of the plot
+This function returns a vector of numbers representing the complexity of the plots
 }
 \description{
-This function calculates complexity of the final plot
-based off of the number of plots, layers, and facets, and the
-desired number of columns of plots, in the final plot
+This function calculates complexity of all the plots
+based off of the number of layers, axes lengths, number of text elements,
+and facets in the final plot
 }

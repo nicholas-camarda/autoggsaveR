@@ -4,25 +4,14 @@
 \alias{auto_save_plot}
 \title{Automatically save a list of ggplot objects as a single image}
 \usage{
-auto_save_plot(
-  plot_lst,
-  relative_output_dir,
-  file_name,
-  ncol = 1,
-  base_size = 20,
-  verbose = TRUE
-)
+auto_save_plot(plot_lst, filename, ncol = 1, verbose = FALSE)
 }
 \arguments{
 \item{plot_lst}{A list of ggplot objects}
 
-\item{relative_output_dir}{relative output directory for the image to be saved}
+\item{filename}{The file name of the image to be saved}
 
-\item{file_name}{The file name of the image to be saved}
-
-\item{ncol}{The number of columns in the final plot (default is 1)}
-
-\item{base_size}{The base size for the final plot (default is 20)}
+\item{ncol}{The number of columns for plots to be placed into in desired in the final image}
 
 \item{verbose}{Controls verbosity of output details}
 }

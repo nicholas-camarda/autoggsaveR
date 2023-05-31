@@ -1,6 +1,8 @@
 #' @importFrom magrittr %>%
-#' @importFrom ggplot2 layer_scales ggplot aes geom_point
+#' @importFrom ggplot2 layer_scales ggplot aes geom_point ggplotGrob labs
 #' @importFrom patchwork wrap_plots
+#' @importFrom purrr transpose
+#' @importFrom stringr str_detect
 NULL
 
 #' Get information about a list of plots
@@ -13,27 +15,52 @@ NULL
 #' @export
 get_plot_info <- function(plot_lst, verbose = FALSE) {
     num_plots <- length(plot_lst)
-    num_layers <- sum(sapply(plot_lst, function(p) length(p$layers)))
-    num_facets <- sum(sapply(plot_lst, function(p) {
+    num_layers <- sapply(plot_lst, function(p) length(p$layers))
+    num_facets <- sapply(plot_lst, function(p) {
         ggplot_data_obj <- ggplot2::ggplot_build(p)$data[[1]]
-        # if no faceting, panel = 1
         panel_levels_num <- max(as.numeric(levels(ggplot_data_obj$PANEL)))
         if (panel_levels_num == 1) {
             num_facets <- 0
         } else {
             num_facets <- max(panel_levels_num)
         }
-    }))
+    })
+
+    num_annots <- sapply(plot_lst, function(p) {
+        ggplot_data_obj <- ggplot2::ggplot_build(p)$data
+        ann_bool <- sapply(ggplot_data_obj, FUN = function(df) {
+            "annotation" %in% colnames(df)
+        })
+        sum(ann_bool)
+    })
+
+    num_text <- sapply(plot_lst, function(p) {
+        grob <- ggplot2::ggplotGrob(p)
+        keep_grobs <- sapply(grob$grobs, FUN = function(i) !startsWith(as.character(i), "zero"))
+        my_grobs <- grob$grobs[keep_grobs]
+        my_grobs_names <- unlist(purrr::transpose(my_grobs)$name)
+        num_title <- sum(ifelse(stringr::str_detect(my_grobs_names, "plot.title"), 1, 0))
+        num_subtitle <- sum(ifelse(stringr::str_detect(my_grobs_names, "plot.subtitle"), 1, 0))
+        num_caption <- sum(ifelse(stringr::str_detect(my_grobs_names, "plot.caption"), 1, 0))
+        num_xlab <- sum(ifelse(stringr::str_detect(my_grobs_names, "axis.title.x"), 1, 0))
+        num_ylab <- sum(ifelse(stringr::str_detect(my_grobs_names, "axis.title.y"), 1, 0))
+        result <- num_title + num_subtitle + num_caption + num_xlab + num_ylab
+        return(result)
+    })
+
 
     if (verbose) {
-        message(GetoptLong::qq("Found:
-            num_plots = @{num_plots}
-            num_layers = @{num_layers}
-            num_facets = @{num_facets}"))
+        message(sprintf(
+            "Found:\nnum_plots = %d\nnum_layers = %d\nnum_facets = %d\nnum_text = %d\nnum_annots = %d\n",
+            num_plots, num_layers, num_facets, num_text, num_annots
+        ))
     }
 
-
-    return(list(num_plots = num_plots, num_layers = num_layers, num_facets = num_facets))
+    return(list(
+        num_plots = num_plots, num_layers = num_layers,
+        num_facets = num_facets, num_text = num_text,
+        num_annots = num_annots
+    ))
 }
 
 
@@ -42,38 +69,106 @@ get_plot_info <- function(plot_lst, verbose = FALSE) {
 #' This function extracts the data from a ggplot object and counts the unique number of
 #' values of the x and y variables
 #'
-#' @param plot A ggplot object
+#' @param plot_lst A list of ggplot objects
 #'
 #' @return A list with the length or range of the x and y axes
 #' @export
-get_num_plot_items <- function(plot) {
-    # Extract the data from the plot
-    plot_data <- ggplot2::ggplot_build(plot)$data[[1]]
-    num_x_items <- length(unique(plot_data$x))
+get_axes_info <- function(plot_lst) {
+    num_x_items <- sapply(plot_lst, function(p) {
+        ggplot_data_obj <- ggplot2::ggplot_build(p)$data[[1]]
+        x_items <- length(ggplot_data_obj[[1]])
+    })
+    num_y_items <- sapply(plot_lst, function(p) {
+        ggplot_data_obj <- ggplot2::ggplot_build(p)$data[[1]]
+        y_items <- length(ggplot_data_obj[[2]])
+    })
 
-    # Count the unique values of the x variable
-    num_y_items <- length(unique(plot_data$y))
-    return(list(num_x_items = num_x_items, num_y_items = num_y_items))
+    result <- list(
+        num_x_items = num_x_items,
+        num_y_items = num_y_items
+    )
+    return(result)
 }
+
+
+#' This function calculates the aspect ratio by considering the number of facets and the range of the x and y axes.
+#'
+#' This function first sets a base aspect ratio of 1.0.
+#' It then adjusts this base ratio based on the number of facets
+#' and the number of items on the x and y axes. If there are
+#' multiple facets, the aspect ratio is increased, which makes
+#' the plot wider. If there are more items on the x-axis than on
+#' the y-axis, the aspect ratio is increased, which also makes the plot wider.
+#'
+#' Conversely, if there are more items on the y-axis than on the x-axis,
+#' the aspect ratio is decreased, which makes the plot taller.
+#'
+#' @param plot_lst A list of ggplot objects
+#' @param plot_info A list containing the plot information from ggplot_build
+#' @param axes_info The maximum number of x and y elements in the list of plots
+#'
+#' @return The adjusted aspect ratio
+#' @export
+get_aspect_ratio <- function(plot_lst, plot_info, axes_info) {
+    arb_vec <- sapply(seq_len(plot_info$num_plots), FUN = function(i) {
+        # Set the base aspect ratio
+        aspect_ratio_base <- 1.0
+        num_facets_i <- plot_info$num_facets[i]
+        num_x_i <- axes_info$num_x_items[i]
+        num_y_i <- axes_info$num_y_items[i]
+        # Adjust the aspect ratio based on the number of facets
+        if (num_facets_i > 0) {
+            aspect_ratio_base <- sqrt(aspect_ratio_base * num_facets_i)
+        }
+
+        # Adjust the aspect ratio based on the x and y axis elements.
+        # To avoid division by zero, add a small constant to the denominator.
+        aspect_ratio_base <- sqrt(aspect_ratio_base * num_x_i / (num_y_i + 1e-10))
+    })
+
+    # Return the adjusted aspect ratio
+    return(arb_vec)
+}
+
+
 
 #' Calculate plot complexity
 #'
-#' This function calculates complexity of the final plot
-#' based off of the number of plots, layers, and facets, and the
-#' desired number of columns of plots, in the final plot
+#' This function calculates complexity of all the plots
+#' based off of the number of layers, axes lengths, number of text elements,
+#' and facets in the final plot
 #'
-#' @param base_size The base size for the final plot (default is 20)
-#' @param plot_info The list of plot information as calculated by `get_plot_info`
-#' @param ncol The number of columns in the output
+#' @param plot_info The list of plot information as calculated by `get_plot_info()`
+#' @param axes_info Axes info generated from `get_axes_info()`
 #'
-#' @return This function returns a number representing the complexity of the plot
+#' @return This function returns a vector of numbers representing the complexity of the plots
 #' @export
-get_plot_complexity <- function(base_size = 20, plot_info, ncol) {
-    sqrt_attrb <- log(plot_info$num_plots + plot_info$num_layers + plot_info$num_facets + ncol)
-    p_cmplx <- sqrt(base_size - plot_info$num_plots + 1) * sqrt_attrb
-    return(p_cmplx)
-}
+get_plot_complexity <- function(plot_info, axes_info) {
+    # Weights for the complexity factors
+    weights <- list(
+        num_layers = 0.5,
+        num_facets = 1.5,
+        num_x_items = 0.2,
+        num_y_items = 0.2,
+        num_text = 0.3,
+        num_annots = 0.3
+    )
 
+    # Calculate the complexity score
+    base_log <- 2.5
+    complexity_score <- sapply(seq_len(plot_info$num_plots), FUN = function(i) {
+        result <- weights$num_layers * log(1 + plot_info$num_layers[i], base_log) +
+            weights$num_facets * log(1 + plot_info$num_facets[i], base_log) +
+            weights$num_x_items * log(1 + axes_info$num_x_items[i], base_log) +
+            weights$num_y_items * log(1 + axes_info$num_y_items[i], base_log) +
+            weights$num_text * log(1 + plot_info$num_text[i], base_log) +
+            weights$num_annots * log(1 + plot_info$num_annots[i], base_log)
+        return(result)
+    })
+
+
+    return(complexity_score)
+}
 
 #' Automatically save a list of ggplot objects as a single image
 #'
@@ -85,81 +180,63 @@ get_plot_complexity <- function(base_size = 20, plot_info, ncol) {
 #' Supports multiple plots in a single ggplot2 object as created by `library(patchwork)`
 #'
 #' @param plot_lst A list of ggplot objects
-#' @param relative_output_dir relative output directory for the image to be saved
-#' @param file_name The file name of the image to be saved
-#' @param ncol The number of columns in the final plot (default is 1)
-#' @param base_size The base size for the final plot (default is 20)
+#' @param filename The file name of the image to be saved
+#' @param ncol The number of columns for plots to be placed into in desired in the final image
 #' @param verbose Controls verbosity of output details
 #'
 #' @return This function does not return a value. It saves the final plot as an image.
 #' @export
-auto_save_plot <- function(plot_lst, relative_output_dir, file_name, ncol = 1, base_size = 20, verbose = TRUE) {
-    # Get the plot info
+auto_save_plot <- function(plot_lst, filename, ncol = 1, verbose = FALSE) {
     plot_info <- get_plot_info(plot_lst, verbose = verbose)
-    axes_info <- t(sapply(plot_lst, function(p) get_num_plot_items(p))) %>%
-        tidyr::as_tibble() %>%
-        tidyr::unnest(cols = c(`num_x_items`, `num_y_items`))
-    max_num_x <- max(axes_info$num_x_items, na.rm = TRUE)
-    max_num_y <- max(axes_info$num_y_items, na.rm = TRUE)
+    axes_info <- get_axes_info(plot_lst)
+    complexity_score <- get_plot_complexity(plot_info, axes_info)
+    aspect_ratio <- get_aspect_ratio(plot_lst, plot_info, axes_info)
 
-    # Adjust the base size
-    adjusted_base_size <- get_plot_complexity(base_size = base_size, plot_info = plot_info, ncol = ncol)
-    complexity_ratio <- base_size / adjusted_base_size
+    widths <- complexity_score * aspect_ratio
+    heights <- complexity_score
 
-    # Adjust the text size of each plot in the list
+    # Save the plot
     if (verbose) {
-        message("For individual plots:")
-    }
-    plot_lst_updated <- lapply(plot_lst, function(p) {
-        # Get the complexity of the individual plot
-        indv_plot_info <- get_plot_info(list(p), verbose = verbose)
-        indv_adjusted_base_size <- get_plot_complexity(base_size = base_size, plot_info = indv_plot_info, ncol = ncol)
-        indv_complexity_ratio <- indv_adjusted_base_size / adjusted_base_size
-
-        # Adjust the text
-        p1 <- p + ggplot2::theme(
-            plot.margin = ggplot2::margin(0.25, 0.25, 0.25, 0.25, "cm"),
-            text = ggplot2::element_text(size = base_size * indv_complexity_ratio),
-            axis.title = ggplot2::element_text(size = base_size * indv_complexity_ratio),
-            axis.ticks = ggplot2::element_line(linewidth = base_size * indv_complexity_ratio * 0.05),
-            axis.ticks.length = ggplot2::unit(base_size * indv_complexity_ratio * 0.2, "pt"),
-            axis.text = ggplot2::element_text(size = base_size * indv_complexity_ratio * 0.8),
-            plot.title = ggplot2::element_text(size = base_size * indv_complexity_ratio * 1.2),
-            plot.subtitle = ggplot2::element_text(size = base_size * indv_complexity_ratio),
-            strip.text = ggplot2::element_text(size = base_size * indv_complexity_ratio)
-        )
-
-        # Check if the plot has geom_point or geom_line and adjust accordingly
-        for (layer in p$layers) {
-            if (class(layer$geom)[1] == "GeomPoint") {
-                p2 <- p1 + ggplot2::geom_point(size = base_size * indv_complexity_ratio * 0.125)
-            }
-            if (class(layer$geom)[1] == "GeomLine") {
-                p2 <- p1 + ggplot2::geom_line(linewidth = base_size * indv_complexity_ratio * 0.05)
-            }
-        }
-
-        return(p2)
-    })
-
-    # Combine the plots into a patchwork object
-    final_plot <- patchwork::wrap_plots(plotlist = plot_lst_updated, ncol = ncol)
-
-    # Calculate dimensions based on the number of axes lengths, panels, plots, and facets in the plot
-    # Normalize the y-range by the maximum y-range
-    height <- adjusted_base_size - log(max_num_y) + log(plot_info$num_layers + plot_info$num_plots + plot_info$num_facets + ncol)
-    width <- adjusted_base_size - log(max_num_x) + log(plot_info$num_layers + plot_info$num_plots + plot_info$num_facets + ncol)
-
-    if (verbose) {
-        message(GetoptLong::qq("Adjusted base size = @{adjusted_base_size}"))
-        # message(GetoptLong::qq("Applying adjusted base size to height/width calculation:  @{indv_adjusted_base_size}"))
-        message(paste("Plotting with height =", height, "and width =", width, "\n"))
+        message(sprintf( # \nbase_size = %d\n
+            "Complexity score = %.2f\naspect_ratio = %.2f\nwidths = %.2f\nheights = %.2f\n",
+            complexity_score, aspect_ratio, widths, heights
+        ))
     }
 
-    dir.create(relative_output_dir, showWarnings = FALSE, recursive = TRUE)
-    # Save the plot with the calculated dimensions
-    ggplot2::ggsave(
-        filename = file.path(relative_output_dir, file_name),
-        plot = final_plot, height = height, width = width
+    # Use the 'patchwork' package to arrange the plots
+    final_plot <- patchwork::wrap_plots(plot_lst,
+        widths = widths,
+        heights = heights,
+        ncol = ncol
     )
+
+    # Make the output directory of the file
+    dir_to_make <- dirname(filename)
+    if (dir_to_make != ".") {
+        if (verbose) {
+            message("Making plot parent directory...")
+        }
+        dir.create(dir_to_make, showWarnings = FALSE, recursive = TRUE)
+    }
+
+    final_width <- sum(complexity_score * aspect_ratio) - sum(log(complexity_score * max(aspect_ratio))) - max(aspect_ratio)
+    final_height <- sum(complexity_score) - sum(log(complexity_score))
+    if (verbose) {
+        message(sprintf( # \nbase_size = %d\n
+            "Final width = %.2f\nFinal height = %.2f",
+            final_width, final_height
+        ))
+    }
+    # Save the plot
+    ggplot2::ggsave(
+        plot = final_plot,
+        filename = filename,
+        width = final_width,
+        height = final_height,
+        dpi = 300
+    )
+
+    if (verbose) {
+        message("Done!")
+    }
 }

@@ -9,6 +9,7 @@ usethis::use_package("patchwork")
 usethis::use_package("tidyr")
 usethis::use_package("GetoptLong")
 usethis::use_package("magrittr")
+usethis::use_package("dplyr")
 
 # add import statements as needed
 
@@ -22,10 +23,11 @@ devtools::check()
 devtools::build()
 
 # add tests
-usethis::use_test("get_plot_info")
-usethis::use_test("get_num_plot_items")
+usethis::use_test("get_axes_info")
+usethis::use_test("get_aspect_ratio")
+usethis::use_test("get_plot_complexity")
 usethis::use_test("auto_save_plot")
-
+usethis::use_test("get_plot_info")
 # test
 devtools::test()
 
@@ -48,8 +50,7 @@ p3 <- ggplot2::ggplot(mtcars, ggplot2::aes(drat, qsec)) +
 plot_lst <- list(p1, p2, p3)
 
 # Call the function with a temporary file path
-temp_file <- "test_withauto.png"
-temp_dir <- "example_images"
-auto_save_plot(plot_lst, temp_dir, temp_file, verbose = TRUE)
+temp_file <- "example_images/test_withauto.png"
+auto_save_plot(plot_lst, temp_file, verbose = TRUE)
 
-ggsave(plot = p1 + p2 + p3, filename = file.path(temp_dir, "test-no_auto.png"))
+ggsave(plot = p1 + p2 + p3, filename = file.path("example_images/test-no_auto.png"))

@@ -1,4 +1,4 @@
-test_that("auto_save_plot saves a plot to a file", {
+test_that("get_plot_complexity works", {
   # Create a list of plots with facets
   p1 <- ggplot2::ggplot(mtcars, ggplot2::aes(mpg, disp, color = wt)) +
     ggplot2::geom_point() +
@@ -26,19 +26,9 @@ test_that("auto_save_plot saves a plot to a file", {
     )
   plot_lst <- list(p1, p2, p3)
 
-  # Call the function with a temporary file path
-  temp_file <- tempfile(fileext = ".pdf")
-  temp_dir <- "test"
-  auto_save_plot(
-    plot_lst = plot_lst,
-    filename = file.path(temp_dir, temp_file),
-    ncol = 1,
-    verbose = TRUE
-  )
+  plot_info <- get_plot_info(plot_lst, verbose = TRUE)
+  axes_info <- get_axes_info(plot_lst)
+  test_val <- get_plot_complexity(plot_info, axes_info)
 
-  # Check that the file was created
-  expect_true(file.exists(file.path(temp_dir, temp_file)))
-
-  # Clean up the temporary file
-  unlink(temp_dir, recursive = TRUE, force = TRUE)
+  expect_equal(test_val, c(4.7009638, 4.9222173, 5.6767678))
 })

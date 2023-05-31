@@ -57,7 +57,7 @@ print(plot_info)
 You can also get the number of items on the x and y axes of the plots using the `get_num_plot_items` function:
 
 ```r
-axes_info <- get_axes_info(p1)
+axes_info <- get_axes_info(plot_lst)
 print(axes_info)
 
 # $num_x_items

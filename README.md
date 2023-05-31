@@ -18,11 +18,16 @@ devtools::install_github("nicholas-camarda/autoggsaveR")
 library(autoggsaveR)
 
 # Create a list of plots
-p1 <- ggplot(mtcars, aes(mpg, disp)) +
-  geom_point()
-p2 <- ggplot(mtcars, aes(hp, wt)) +
-  geom_point()
-plot_lst <- list(p1, p2)
+p1 <- ggplot2::ggplot(mtcars, ggplot2::aes(mpg, disp)) +
+  ggplot2::geom_point() +
+  ggplot2::facet_wrap(~`cyl`)
+p2 <- ggplot2::ggplot(mtcars, ggplot2::aes(hp, wt)) +
+  ggplot2::geom_point() +
+  ggplot2::facet_wrap(~`gear`)
+p3 <- ggplot2::ggplot(mtcars, ggplot2::aes(drat, qsec)) +
+  ggplot2::geom_point() +
+  ggplot2::facet_wrap(~`carb`)
+plot_lst <- list(p1, p2, p3)
 ```
 
 You can get information about the plots using the `get_plot_info` function:
@@ -32,27 +37,34 @@ plot_info <- get_plot_info(plot_lst)
 print(plot_info)
 
 # $num_plots
-# [1] 2
+# [1] 3
 
 # $num_layers
-# [1] 2
+# [1] 1 1 1 
 
 # $num_facets
-# [1] 0
+# [1] 3 3 6
+
+# $num_text
+# [1] 2 2 2
+
+# $num_annots
+# [1] 0 0 0 0
+
 
 ```
 
-You can also get the number of items on the x and y axes of a plot using the `get_num_plot_items` function:
+You can also get the number of items on the x and y axes of the plots using the `get_num_plot_items` function:
 
 ```r
-axes_info <- get_num_plot_items(p1)
+axes_info <- get_axes_info(p1)
 print(axes_info)
 
 # $num_x_items
-# [1] 25
+# [1] 32 32 32
 
 # $num_y_items
-# [1] 27
+# [1] 32 32 32
 ```
 
 Finally, you can save the plots as a single image using the auto_save_plot function. This will save the plots as a single image in a directory you specify relative to your working directory. The output directory will be created recursively if it doesn't exist:
@@ -60,28 +72,13 @@ Finally, you can save the plots as a single image using the auto_save_plot funct
 ```r
 auto_save_plot(
     plot = plot_lst, 
-    relative_output_dir = "output_dir", 
-    file_name = "my_plots.png", 
-    base_size = 20, 
+    filename = "example_images/test_withauto.png", 
     ncol = 1,
     verbose = TRUE
 )
 ```
 
 ## Example plot
-
-```r
-  p1 <- ggplot2::ggplot(mtcars, ggplot2::aes(mpg, disp)) +
-    ggplot2::geom_point() +
-    ggplot2::facet_wrap(~`cyl`)
-  p2 <- ggplot2::ggplot(mtcars, ggplot2::aes(hp, wt)) +
-    ggplot2::geom_point() +
-    ggplot2::facet_wrap(~`gear`)
-  p3 <- ggplot2::ggplot(mtcars, ggplot2::aes(drat, qsec)) +
-    ggplot2::geom_point() +
-    ggplot2::facet_wrap(~`carb`)
-  plot_lst <- list(p1, p2, p3)
-```
 
 Without `autoggsaveR`:
 
@@ -110,12 +107,14 @@ auto_save_plot(
 # num_facets = 3
 # num_text = 2
 # num_annots = 0
+
 # Found:
 # num_plots = 3
 # num_layers = 1
 # num_facets = 3
 # num_text = 2
 # num_annots = 0
+
 # Found:
 # num_plots = 3
 # num_layers = 1
@@ -127,10 +126,12 @@ auto_save_plot(
 # aspect_ratio = 1.32
 # widths = 5.97
 # heights = 4.53
+
 # Complexity score = 4.53
 # aspect_ratio = 1.32
 # widths = 5.97
 # heights = 4.53
+
 # Complexity score = 5.45
 # aspect_ratio = 1.57
 # widths = 8.53

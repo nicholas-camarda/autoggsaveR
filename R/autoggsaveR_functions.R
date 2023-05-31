@@ -11,7 +11,7 @@ NULL
 #'
 #' @param plot_lst A list of ggplot objects
 #' @param verbose Controls verbosity of output details
-#' @return A list with the number of plots, layers, and facets
+#' @return A list with the number of plots, layers, facets, text, and annotations (e.g. p-value annotations from rstatix)
 #' @export
 get_plot_info <- function(plot_lst, verbose = FALSE) {
     num_plots <- length(plot_lst)
@@ -51,7 +51,7 @@ get_plot_info <- function(plot_lst, verbose = FALSE) {
 
     if (verbose) {
         message(sprintf(
-            "Found:\nnum_plots = %d\nnum_layers = %d\nnum_facets = %d\nnum_text = %d\nnum_annots = %d\n",
+            "\nFound:\nnum_plots = %d\nnum_layers = %d\nnum_facets = %d\nnum_text = %d\nnum_annots = %d\n",
             num_plots, num_layers, num_facets, num_text, num_annots
         ))
     }
@@ -198,7 +198,7 @@ auto_save_plot <- function(plot_lst, filename, ncol = 1, verbose = FALSE) {
     # Save the plot
     if (verbose) {
         message(sprintf( # \nbase_size = %d\n
-            "Complexity score = %.2f\naspect_ratio = %.2f\nwidths = %.2f\nheights = %.2f\n",
+            "\nComplexity score = %.2f\naspect_ratio = %.2f\nwidths = %.2f\nheights = %.2f\n",
             complexity_score, aspect_ratio, widths, heights
         ))
     }
@@ -214,7 +214,7 @@ auto_save_plot <- function(plot_lst, filename, ncol = 1, verbose = FALSE) {
     dir_to_make <- dirname(filename)
     if (dir_to_make != ".") {
         if (verbose) {
-            message("Making plot parent directory...")
+            message("\nMaking plot parent directory...")
         }
         dir.create(dir_to_make, showWarnings = FALSE, recursive = TRUE)
     }
@@ -223,7 +223,7 @@ auto_save_plot <- function(plot_lst, filename, ncol = 1, verbose = FALSE) {
     final_height <- sum(complexity_score) - sum(log(complexity_score))
     if (verbose) {
         message(sprintf( # \nbase_size = %d\n
-            "Final width = %.2f\nFinal height = %.2f",
+            "\nFinal width = %.2f\nFinal height = %.2f",
             final_width, final_height
         ))
     }

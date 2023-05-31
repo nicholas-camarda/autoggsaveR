@@ -111,8 +111,8 @@ get_axes_info <- function(plot_lst) {
 #' @export
 get_aspect_ratio <- function(plot_lst, plot_info, axes_info) {
     arb_vec <- sapply(seq_len(plot_info$num_plots), FUN = function(i) {
-        # Set the base aspect ratio
-        aspect_ratio_base <- 1.0
+        # Set the base aspect ratio (should i expose this?)
+        aspect_ratio_base <- 0.5
         num_facets_i <- plot_info$num_facets[i]
         num_x_i <- axes_info$num_x_items[i]
         num_y_i <- axes_info$num_y_items[i]
@@ -146,12 +146,12 @@ get_aspect_ratio <- function(plot_lst, plot_info, axes_info) {
 get_plot_complexity <- function(plot_info, axes_info) {
     # Weights for the complexity factors
     weights <- list(
-        num_layers = 0.5,
+        num_layers = 0.75,
         num_facets = 1.5,
-        num_x_items = 0.2,
-        num_y_items = 0.2,
-        num_text = 0.3,
-        num_annots = 0.3
+        num_x_items = 0.3,
+        num_y_items = 0.3,
+        num_text = 0.4,
+        num_annots = 3
     )
 
     # Calculate the complexity score
@@ -192,8 +192,8 @@ auto_save_plot <- function(plot_lst, filename, ncol = 1, verbose = FALSE) {
     complexity_score <- get_plot_complexity(plot_info, axes_info)
     aspect_ratio <- get_aspect_ratio(plot_lst, plot_info, axes_info)
 
-    widths <- complexity_score * aspect_ratio
-    heights <- complexity_score
+    widths <- complexity_score * aspect_ratio + log(complexity_score * aspect_ratio)
+    heights <- complexity_score + log(complexity_score)
 
     # Save the plot
     if (verbose) {

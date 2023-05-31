@@ -30,5 +30,5 @@ test_that("get_plot_complexity works", {
   axes_info <- get_axes_info(plot_lst)
   test_val <- get_plot_complexity(plot_info, axes_info)
 
-  expect_equal(test_val, c(4.7009638, 4.9222173, 5.6767678))
+  expect_equal(test_val, c(5.82891591, 6.16079620, 6.82461769))
 })

@@ -12,7 +12,7 @@ get_plot_info(plot_lst, verbose = FALSE)
 \item{verbose}{Controls verbosity of output details}
 }
 \value{
-A list with the number of plots, layers, and facets
+A list with the number of plots, layers, facets, text, and annotations (e.g. p-value annotations from rstatix)
 }
 \description{
 This function extracts the number of plots, the number of layers across all plots, and the number of facets

@@ -18,40 +18,58 @@ devtools::install_github("nicholas-camarda/autoggsaveR")
 library(autoggsaveR)
 
 # Create a list of plots
-p1 <- ggplot2::ggplot(mtcars, ggplot2::aes(mpg, disp)) +
-  ggplot2::geom_point() +
-  ggplot2::facet_wrap(~`cyl`)
-p2 <- ggplot2::ggplot(mtcars, ggplot2::aes(hp, wt)) +
-  ggplot2::geom_point() +
-  ggplot2::facet_wrap(~`gear`)
-p3 <- ggplot2::ggplot(mtcars, ggplot2::aes(drat, qsec)) +
-  ggplot2::geom_point() +
-  ggplot2::facet_wrap(~`carb`)
-plot_lst <- list(p1, p2, p3)
+  p1 <- ggplot2::ggplot(mtcars, ggplot2::aes(mpg, disp, color = wt)) +
+    ggplot2::geom_point() +
+    ggplot2::scale_colour_steps2(
+      low = "blue",
+      mid = "white",
+      high = "red",
+    ) +
+    ggplot2::facet_wrap(~`cyl`) +
+    ggplot2::labs(title = "plot 1", subtitle = "subtitle 1")
+
+  p2 <- ggplot2::ggplot(mtcars, ggplot2::aes(hp, wt)) +
+    ggplot2::geom_point() +
+    ggplot2::geom_label(ggplot2::aes(label = wt)) + # 2 layers here
+    ggplot2::facet_wrap(~`gear`) +
+    ggplot2::labs(title = "plot 2", subtitle = "subtitle 2")
+
+  p3 <- ggplot2::ggplot(mtcars, ggplot2::aes(factor(cyl), qsec, fill = factor(cyl))) +
+    ggplot2::geom_boxplot() +
+    ggplot2::labs(
+      title = "plot 3",
+      subtitle = "subtitle 3",
+      caption = "caption" # add a caption
+    ) +
+    ggpubr::stat_compare_means(
+      label.x.npc = "middle",
+      ggplot2::aes(label = ggplot2::after_stat(p.signif)),
+      method = "t.test", ref.group = "4",
+      comparisons = list(c("4", "6"), c("4", "8"), c("6", "8")),
+      label.y = c(23, 22, 21)
+    )
+  plot_lst <- list(p1, p2, p3)
 ```
 
 You can get information about the plots using the `get_plot_info` function:
 
 ```r
 plot_info <- get_plot_info(plot_lst)
-print(plot_info)
-
+   print(plot_info)
 # $num_plots
 # [1] 3
 
 # $num_layers
-# [1] 1 1 1 
+# [1] 1 2 2
 
 # $num_facets
-# [1] 3 3 6
+# [1] 3 3 0
 
 # $num_text
-# [1] 2 2 2
+# [1] 4 4 5
 
 # $num_annots
-# [1] 0 0 0 0
-
-
+# [1] 0 0 1
 ```
 
 You can also get the number of items on the x and y axes of the plots using the `get_num_plot_items` function:
@@ -61,10 +79,10 @@ axes_info <- get_axes_info(plot_lst)
 print(axes_info)
 
 # $num_x_items
-# [1] 32 32 32
+# [1] 32 32 3
 
 # $num_y_items
-# [1] 32 32 32
+# [1] 32 32 3
 ```
 
 Finally, you can save the plots as a single image using the auto_save_plot function. This will save the plots as a single image in a directory you specify relative to your working directory. The output directory will be created recursively if it doesn't exist:
@@ -84,9 +102,9 @@ Without `autoggsaveR`:
 
 ```r
 library(patchwork)
-ggsave(plot = p1 + p2 + p3, filename = file.path("example_images", "test-no_auto.png"))
+ggplot2::ggsave(plot = p1 + p2 + p3, filename = file.path("example_images", "test-no_auto.png"))
 
-# Saving 6.64 x 4.78 in image
+# Saving 9.4 x 6.86 in image
 ```
 
 ![alt text](example_images/test-no_auto.png)
@@ -101,45 +119,49 @@ auto_save_plot(
     ncol = 1,
     verbose = TRUE
 )
-# Found:
-# num_plots = 3
-# num_layers = 1
-# num_facets = 3
-# num_text = 2
-# num_annots = 0
 
 # Found:
 # num_plots = 3
 # num_layers = 1
 # num_facets = 3
-# num_text = 2
+# num_text = 4
+# num_annots = 0
+
+# Found:
+# num_plots = 3
+# num_layers = 2
+# num_facets = 3
+# num_text = 4
 # num_annots = 0
 
 # Found:
 # num_plots = 3
 # num_layers = 1
 # num_facets = 6
-# num_text = 2
+# num_text = 5
 # num_annots = 0
 
-# Complexity score = 4.53
-# aspect_ratio = 1.32
-# widths = 5.97
-# heights = 4.53
 
-# Complexity score = 4.53
-# aspect_ratio = 1.32
-# widths = 5.97
-# heights = 4.53
+# Complexity score = 5.83
+# aspect_ratio = 1.11
+# widths = 8.31
+# heights = 7.59
 
-# Complexity score = 5.45
-# aspect_ratio = 1.57
-# widths = 8.53
-# heights = 5.45
+# Complexity score = 6.16
+# aspect_ratio = 1.11
+# widths = 8.74
+# heights = 7.98
+
+# Complexity score = 6.82
+# aspect_ratio = 1.32
+# widths = 11.18
+# heights = 8.75
+
 
 # Making plot parent directory...
-# Final width = 12.84
-# Final height = 9.80
+
+# Final width = 14.61
+# Final height = 13.31
 # Done!
 ```
 

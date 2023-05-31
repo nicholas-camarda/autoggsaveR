@@ -3,6 +3,7 @@
 #' @importFrom patchwork wrap_plots
 #' @importFrom purrr transpose
 #' @importFrom stringr str_detect
+#' @importFrom gridExtra grid.arrange
 NULL
 
 #' Get information about a list of plots
@@ -116,9 +117,14 @@ get_aspect_ratio <- function(plot_lst, plot_info, axes_info) {
         num_facets_i <- plot_info$num_facets[i]
         num_x_i <- axes_info$num_x_items[i]
         num_y_i <- axes_info$num_y_items[i]
+        num_annots_i <- plot_info$num_annots[i]
         # Adjust the aspect ratio based on the number of facets
         if (num_facets_i > 0) {
             aspect_ratio_base <- sqrt(aspect_ratio_base * num_facets_i)
+        }
+
+        if (num_annots_i > 0) {
+            aspect_ratio_base <- (aspect_ratio_base + num_annots_i) / num_x_i
         }
 
         # Adjust the aspect ratio based on the x and y axis elements.
@@ -148,9 +154,9 @@ get_plot_complexity <- function(plot_info, axes_info) {
     weights <- list(
         num_layers = 0.75,
         num_facets = 1.5,
-        num_x_items = 0.3,
-        num_y_items = 0.3,
-        num_text = 0.4,
+        num_x_items = 0.5,
+        num_y_items = 0.5,
+        num_text = 0.6,
         num_annots = 3
     )
 
@@ -210,7 +216,7 @@ auto_save_plot <- function(plot_lst, filename, ncol = 1, verbose = FALSE) {
         ncol = ncol
     )
 
-    # Make the output directory of the file
+    # Make thee output directory of the file
     dir_to_make <- dirname(filename)
     if (dir_to_make != ".") {
         if (verbose) {

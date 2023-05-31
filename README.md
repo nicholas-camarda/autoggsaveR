@@ -104,7 +104,7 @@ Without `autoggsaveR`:
 library(patchwork)
 ggplot2::ggsave(plot = p1 + p2 + p3, filename = file.path("example_images", "test-no_auto.png"))
 
-# Saving 9.4 x 6.86 in image
+# Saving 6.74 x 6.86 in image
 ```
 
 ![alt text](example_images/test-no_auto.png)
@@ -116,7 +116,7 @@ library(autoggsaveR)
 auto_save_plot(
     plot = plot_lst, 
     filename = "example_images/test_withauto.png", 
-    ncol = 1,
+    ncol = 3,
     verbose = TRUE
 )
 
@@ -136,33 +136,30 @@ auto_save_plot(
 
 # Found:
 # num_plots = 3
-# num_layers = 1
-# num_facets = 6
+# num_layers = 2
+# num_facets = 0
 # num_text = 5
-# num_annots = 0
+# num_annots = 1
 
 
-# Complexity score = 5.83
+# Complexity score = 7.71
 # aspect_ratio = 1.11
-# widths = 8.31
-# heights = 7.59
+# widths = 10.67
+# heights = 9.75
 
-# Complexity score = 6.16
+# Complexity score = 8.04
 # aspect_ratio = 1.11
-# widths = 8.74
-# heights = 7.98
+# widths = 11.08
+# heights = 10.12
 
-# Complexity score = 6.82
-# aspect_ratio = 1.32
-# widths = 11.18
-# heights = 8.75
+# Complexity score = 5.85
+# aspect_ratio = 0.71
+# widths = 5.56
+# heights = 7.62
 
 
-# Making plot parent directory...
-
-# Final width = 14.61
-# Final height = 13.31
-# Done!
+# Final width = 14.26
+# Final height = 15.71
 ```
 
 ![alt text](example_images/test_withauto.png)

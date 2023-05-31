@@ -1,11 +1,11 @@
-rm(list = ls())
+# rm(list = ls())
 library(tidyverse)
 library(rstatix)
 library(ggprism)
 library(GetoptLong)
 library(ggpubr)
 library(patchwork) # using version 1.1.2.9000
-library(autoggsaveR)
+# library(autoggsaveR)
 
 # vehicle_line_color <- "#000000"
 # vehicle_point_color <- "#4d4a4a"
@@ -294,5 +294,7 @@ final_plot_lst <- list(veh_pre_plot, sor_pre_plot, veh_post_plot, sor_post_plot)
 auto_save_plot(
     plot_lst = final_plot_lst,
     filename = "example_images/AUTOPLOT_complex.pdf",
-    ncol = 2
+    preserve_aspect = TRUE,
+    ncol = 2,
+    verbose = TRUE
 )

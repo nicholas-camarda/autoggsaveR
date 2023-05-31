@@ -3,7 +3,6 @@
 #' @importFrom patchwork wrap_plots
 #' @importFrom purrr transpose
 #' @importFrom stringr str_detect
-#' @importFrom gridExtra grid.arrange
 NULL
 
 #' Get information about a list of plots
@@ -113,7 +112,7 @@ get_axes_info <- function(plot_lst) {
 get_aspect_ratio <- function(plot_lst, plot_info, axes_info) {
     arb_vec <- sapply(seq_len(plot_info$num_plots), FUN = function(i) {
         # Set the base aspect ratio (should i expose this?)
-        aspect_ratio_base <- 0.5
+        aspect_ratio_base <- 1
         num_facets_i <- plot_info$num_facets[i]
         num_x_i <- axes_info$num_x_items[i]
         num_y_i <- axes_info$num_y_items[i]
@@ -123,13 +122,13 @@ get_aspect_ratio <- function(plot_lst, plot_info, axes_info) {
             aspect_ratio_base <- sqrt(aspect_ratio_base * num_facets_i)
         }
 
-        if (num_annots_i > 0) {
-            aspect_ratio_base <- (aspect_ratio_base + num_annots_i) / num_x_i
-        }
+        # if (num_annots_i > 0) {
+        #     aspect_ratio_base <- (aspect_ratio_base + (num_annots_i / num_x_i))
+        # }
 
         # Adjust the aspect ratio based on the x and y axis elements.
         # To avoid division by zero, add a small constant to the denominator.
-        aspect_ratio_base <- sqrt(aspect_ratio_base * num_x_i / (num_y_i + 1e-10))
+        aspect_ratio_base <- sqrt(aspect_ratio_base * num_x_i / (num_y_i + num_annots_i + 1e-10))
     })
 
     # Return the adjusted aspect ratio
@@ -146,10 +145,11 @@ get_aspect_ratio <- function(plot_lst, plot_info, axes_info) {
 #'
 #' @param plot_info The list of plot information as calculated by `get_plot_info()`
 #' @param axes_info Axes info generated from `get_axes_info()`
+#' @param preserve_aspect Finds the min aspect ratio and caries this throughout all the plots
 #'
 #' @return This function returns a vector of numbers representing the complexity of the plots
 #' @export
-get_plot_complexity <- function(plot_info, axes_info) {
+get_plot_complexity <- function(plot_info, axes_info, preserve_aspect) {
     # Weights for the complexity factors
     weights <- list(
         num_layers = 0.75,
@@ -157,7 +157,7 @@ get_plot_complexity <- function(plot_info, axes_info) {
         num_x_items = 0.5,
         num_y_items = 0.5,
         num_text = 0.6,
-        num_annots = 3
+        num_annots = 1.1
     )
 
     # Calculate the complexity score
@@ -172,6 +172,9 @@ get_plot_complexity <- function(plot_info, axes_info) {
         return(result)
     })
 
+    if (preserve_aspect) {
+        complexity_score <- rep(min(complexity_score), length(complexity_score))
+    }
 
     return(complexity_score)
 }
@@ -188,14 +191,15 @@ get_plot_complexity <- function(plot_info, axes_info) {
 #' @param plot_lst A list of ggplot objects
 #' @param filename The file name of the image to be saved
 #' @param ncol The number of columns for plots to be placed into in desired in the final image
+#' @param preserve_aspect Finds the min aspect ratio and caries this throughout all the plots
 #' @param verbose Controls verbosity of output details
 #'
 #' @return This function does not return a value. It saves the final plot as an image.
 #' @export
-auto_save_plot <- function(plot_lst, filename, ncol = 1, verbose = FALSE) {
+auto_save_plot <- function(plot_lst, filename, ncol = 1, preserve_aspect = FALSE, verbose = FALSE) {
     plot_info <- get_plot_info(plot_lst, verbose = verbose)
     axes_info <- get_axes_info(plot_lst)
-    complexity_score <- get_plot_complexity(plot_info, axes_info)
+    complexity_score <- get_plot_complexity(plot_info, axes_info, preserve_aspect = preserve_aspect)
     aspect_ratio <- get_aspect_ratio(plot_lst, plot_info, axes_info)
 
     widths <- complexity_score * aspect_ratio + log(complexity_score * aspect_ratio)

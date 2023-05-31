@@ -23,5 +23,6 @@ test_that("get_aspect_ratio works works", {
   plot_info <- get_plot_info(plot_lst, verbose = TRUE)
   axes_info <- get_axes_info(plot_lst)
   adjusted_aspect_ratio <- get_aspect_ratio(plot_lst, plot_info, axes_info)
-  expect_equal(adjusted_aspect_ratio, c(1.10668192, 1.10668192, 1.31607401))
+  # this works...
+  expect_equal(adjusted_aspect_ratio, c(1.31607401, 1.31607401, 1.56508458))
 })

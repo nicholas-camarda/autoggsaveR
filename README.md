@@ -91,7 +91,8 @@ Finally, you can save the plots as a single image using the auto_save_plot funct
 auto_save_plot(
     plot = plot_lst, 
     filename = "example_images/test_withauto.png", 
-    ncol = 1,
+    ncol = 3,
+    preserve_aspect = TRUE,
     verbose = TRUE
 )
 ```
@@ -117,6 +118,7 @@ auto_save_plot(
     plot = plot_lst, 
     filename = "example_images/test_withauto.png", 
     ncol = 3,
+    preserve_aspect = TRUE,
     verbose = TRUE
 )
 
@@ -142,24 +144,27 @@ auto_save_plot(
 # num_annots = 1
 
 
-# Complexity score = 7.71
-# aspect_ratio = 1.11
-# widths = 10.67
-# heights = 9.75
+# Complexity score = 4.42
+# aspect_ratio = 1.32
+# widths = 7.57
+# heights = 5.90
 
-# Complexity score = 8.04
-# aspect_ratio = 1.11
-# widths = 11.08
-# heights = 10.12
+# Complexity score = 4.42
+# aspect_ratio = 1.32
+# widths = 7.57
+# heights = 5.90
 
-# Complexity score = 5.85
-# aspect_ratio = 0.71
-# widths = 5.56
-# heights = 7.62
+# Complexity score = 4.42
+# aspect_ratio = 0.87
+# widths = 5.17
+# heights = 5.90
 
 
-# Final width = 14.26
-# Final height = 15.71
+# Making plot parent directory...
+
+# Final width = 8.86
+# Final height = 8.80
+# Done!
 ```
 
 ![alt text](example_images/test_withauto.png)

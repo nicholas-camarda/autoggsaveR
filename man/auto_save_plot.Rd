@@ -4,7 +4,13 @@
 \alias{auto_save_plot}
 \title{Automatically save a list of ggplot objects as a single image}
 \usage{
-auto_save_plot(plot_lst, filename, ncol = 1, verbose = FALSE)
+auto_save_plot(
+  plot_lst,
+  filename,
+  ncol = 1,
+  preserve_aspect = FALSE,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{plot_lst}{A list of ggplot objects}
@@ -12,6 +18,8 @@ auto_save_plot(plot_lst, filename, ncol = 1, verbose = FALSE)
 \item{filename}{The file name of the image to be saved}
 
 \item{ncol}{The number of columns for plots to be placed into in desired in the final image}
+
+\item{preserve_aspect}{Finds the min aspect ratio and caries this throughout all the plots}
 
 \item{verbose}{Controls verbosity of output details}
 }

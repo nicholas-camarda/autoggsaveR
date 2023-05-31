@@ -4,12 +4,14 @@
 \alias{get_plot_complexity}
 \title{Calculate plot complexity}
 \usage{
-get_plot_complexity(plot_info, axes_info)
+get_plot_complexity(plot_info, axes_info, preserve_aspect)
 }
 \arguments{
 \item{plot_info}{The list of plot information as calculated by \code{get_plot_info()}}
 
 \item{axes_info}{Axes info generated from \code{get_axes_info()}}
+
+\item{preserve_aspect}{Finds the min aspect ratio and caries this throughout all the plots}
 }
 \value{
 This function returns a vector of numbers representing the complexity of the plots
